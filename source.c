@@ -1,12 +1,13 @@
 #include<stdio.h>
-int main()
+#include<conio.h>
+void main()
 {
     int a = 25;         
     int b= 34;        //comment one
     if(a<b){
         printf("hellow");
     }
-    while(some);
+    while(some)
     {
         i am here;
     }

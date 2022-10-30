@@ -2,12 +2,11 @@
 #include <fstream>
 #include <string>
 #include<vector>
-#include<iterator>
 #include <regex>
 #include<stack>
 using namespace std;
 vector<string> source_code;
-vector<string> preprocessors;
+vector<string> headers;
 vector<string> main_elements;
 vector<int> line_number;
 int main()
@@ -51,7 +50,13 @@ int main()
     int main_end = 0;
     bool is_found = false;
     for(int it = 0;it < source_code.size();it++){
-        if(regex_match(source_code[it],regex("int\\s+main\\s*\\(\\)"))){
+        smatch head;
+        if(regex_match(source_code[it],head,regex("#\\s*include\\s*<([\\w\\s\\.]*)>"))){
+            headers.push_back(head.str(1));
+        }
+
+
+        if(regex_match(source_code[it],regex("(?:int|void)\\s+main\\s*\\(\\)\\s*\\{?"))){
             flag = true;
             main_start = it;
         }
@@ -71,17 +76,22 @@ int main()
         }
     }
     for(int it = main_start;it <= main_end;it++){
+        cout<<source_code[it]<<endl;
         if(regex_match(source_code[it],regex(".*;$"))){
-            if(regex_match(source_code[it],regex("(?:.*\\{.*)|(?:.*\\}.*)|(?:.*if\\s*\\(.*\\).*)|(?:while\\s*\\(.+\\).*)"))){
+            if(regex_match(source_code[it],regex("(?:.*\\{.*)|(?:.*\\}.*)|(?:.*if\\s*\\(.*\\).*)|(?:while\\s*\\(.+\\).*)|(?:int|void|float|double|char)\\s+[A-Za-z_][A-Za-z0-9_]*\\s*\\(\\)\\s*\\{?"))){
                 cout<<"Extra semiclone is given on line: "<<line_number[it]<<" "<<source_code[it]<<endl;
             }
         }else{
-            if(regex_match(source_code[it],regex("(?:.*\\{.*)|(?:.*\\}.*)|(?:.*if\\s*\\(.*\\).*)|(?:while\\s*\\(.+\\))"))){
+            if(regex_match(source_code[it],regex("(?:.*\\{.*)|(?:.*\\}.*)|(?:.*if\\s*\\(.*\\).*)|(?:while\\s*\\(.+\\))|(?:int|void|float|double|char)\\s+[A-Za-z_][A-Za-z0-9_]*\\s*\\(\\)\\s*\\{?"))){
                 continue;
             }
             cout<<"no semiclone at "<<line_number[it]<<" ";
             cout<<source_code[it]<<endl;
         }
+        
     }
+
+
+    
     return 0;
 }
