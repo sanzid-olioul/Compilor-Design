@@ -6,6 +6,10 @@ int main()
     if(a<b){
         printf("hellow");
     }
+    while(some);
+    {
+        i am here;
+    }
     /*
     some comments
     of multi line
