@@ -1,21 +1,46 @@
 #include<iostream>
-#include <fstream>
-#include <string>
+#include<fstream>
+#include<string>
 #include<vector>
-#include <regex>
+#include<regex>
 #include<stack>
+#include<map>
 using namespace std;
-vector<string> source_code;
-vector<string> headers;
 vector<string> main_elements;
-vector<int> line_number;
+vector<string> source_code;
+vector<int> line_number,funcl;
+vector<string> functions;
+vector<string> headers;
+
+
+map<string,vector<string>> header_functions;
+void add_headers(){
+    header_functions["stdio.h"].push_back("printf");
+    header_functions["stdio.h"].push_back("scanf");
+    header_functions["stdio.h"].push_back("gets");
+    header_functions["stdio.h"].push_back("puts");
+    header_functions["stdio.h"].push_back("getline");
+
+    header_functions["conio.h"].push_back("clrscr");
+    header_functions["conio.h"].push_back("getch");
+    header_functions["conio.h"].push_back("getche");
+    header_functions["math.h"].push_back("abs");
+    header_functions["math.h"].push_back("floor");
+    header_functions["math.h"].push_back("ceil");
+    header_functions["math.h"].push_back("random");
+    header_functions["math.h"].push_back("round");
+    header_functions["math.h"].push_back("truncat");    
+}
+
 int main()
 {
+    
     ifstream file("source.c");
     string line;
     string raw_code = "";
     bool flag = true;
     int line_count = 0;
+    add_headers();//for initializing library headers.
     while (getline (file, line)) {
         line_count++;
         line = regex_replace(line,regex("//.+$"),"");//Deleting single line comments.
@@ -76,22 +101,46 @@ int main()
         }
     }
     for(int it = main_start;it <= main_end;it++){
-        cout<<source_code[it]<<endl;
+        //cout<<source_code[it]<<endl;
         if(regex_match(source_code[it],regex(".*;$"))){
             if(regex_match(source_code[it],regex("(?:.*\\{.*)|(?:.*\\}.*)|(?:.*if\\s*\\(.*\\).*)|(?:while\\s*\\(.+\\).*)|(?:int|void|float|double|char)\\s+[A-Za-z_][A-Za-z0-9_]*\\s*\\(\\)\\s*\\{?"))){
                 cout<<"Extra semiclone is given on line: "<<line_number[it]<<" "<<source_code[it]<<endl;
             }
         }else{
-            if(regex_match(source_code[it],regex("(?:.*\\{.*)|(?:.*\\}.*)|(?:.*if\\s*\\(.*\\).*)|(?:while\\s*\\(.+\\))|(?:int|void|float|double|char)\\s+[A-Za-z_][A-Za-z0-9_]*\\s*\\(\\)\\s*\\{?"))){
-                continue;
+            if(!regex_match(source_code[it],regex("(?:.*\\{.*)|(?:.*\\}.*)|(?:.*if\\s*\\(.*\\).*)|(?:while\\s*\\(.+\\))|(?:int|void|float|double|char)\\s+[A-Za-z_][A-Za-z0-9_]*\\s*\\(\\)\\s*\\{?"))){
+                cout<<"no semiclone at "<<source_code[it]<<" "<<line_number[it]<<endl;
+                
             }
-            cout<<"no semiclone at "<<line_number[it]<<" ";
-            cout<<source_code[it]<<endl;
         }
-        
+        smatch func;
+        if(regex_match(source_code[it],func,regex("\\s*([a-zA-Z_][a-zA-Z0-0_]*)\\([\\w,\"%&]*\\)\\s*;"))){
+            functions.push_back(func.str(1));
+            funcl.push_back(line_number[it]);
+            // cout<<func.str(1)<<endl;
+        } 
     }
-
-
+    int i=0,j=0,k=0;
+    while(i<functions.size()){
+        j=0;
+        bool found = false;
+        while(j<headers.size()){
+            k=0;
+            while(k<header_functions[headers[j]].size()){
+                if(header_functions[headers[j]][k] == functions[i]){
+                    found = true;
+                    break;
+                }
+                // cout<<header_functions[headers[j]][k]<<endl;
+                k++;
+            }
+            j++;
+        }
+        if(!found){
+            cout<<functions[i]<<" is not defined on line "<<funcl[i]<<endl;
+        }
+        i++;
+    }
+    
     
     return 0;
 }

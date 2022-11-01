@@ -1,15 +1,16 @@
-#include<stdio.h>
 #include<conio.h>
+#include<stdio.h>
 void main()
 {
     int a = 25;         
     int b= 34;        //comment one
     if(a<b){
         printf("hellow");
+        scanf("%d",&a)
     }
     while(some)
     {
-        i am here;
+        i am here
     }
     /*
     some comments
@@ -18,6 +19,6 @@ void main()
     */
     //comment 2
     //another comments
-    float x = 34.44;
+    float x = 34.44
     return 0;       
 }
