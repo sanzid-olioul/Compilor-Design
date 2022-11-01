@@ -1,6 +1,7 @@
 #include<conio.h>
 #include<stdio.h>
 void main()
+}
 {
     int a = 25;         
     int b= 34;        //comment one
@@ -9,7 +10,7 @@ void main()
         scanf("%d",&a)
     }
     while(some)
-    {
+    
         i am here
     }
     /*
@@ -20,5 +21,6 @@ void main()
     //comment 2
     //another comments
     float x = 34.44
-    return 0;       
+    return 0;      
 }
+

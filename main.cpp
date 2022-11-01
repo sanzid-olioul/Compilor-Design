@@ -14,6 +14,9 @@ vector<string> headers;
 
 
 map<string,vector<string>> header_functions;
+/*
+For adding standard functions of the header files;
+*/
 void add_headers(){
     header_functions["stdio.h"].push_back("printf");
     header_functions["stdio.h"].push_back("scanf");
@@ -35,14 +38,14 @@ void add_headers(){
 int main()
 {
     
-    ifstream file("source.c");
-    string line;
-    string raw_code = "";
-    bool flag = true;
-    int line_count = 0;
+    ifstream file("source.c");//initialize a file variable for reading data
+    string line;//string variables for reading line by line
+    string raw_code = "";//raw string of full source code.
+    bool flag = true;//taking a flag for skipping multi line comments.
+    int line_count = 0;//for keep track of user source code line.
     add_headers();//for initializing library headers.
     while (getline (file, line)) {
-        line_count++;
+        line_count++;//for every iterate increasing line number
         line = regex_replace(line,regex("//.+$"),"");//Deleting single line comments.
         line = regex_replace(line,regex("^\\s+|\\s+$"),""); //For removing white spaces.
         /*
@@ -59,7 +62,9 @@ int main()
             flag = true;
             continue;
         }
-        
+        /*
+        taking the pure source code.
+        */
         if(flag){
             if(line != ""){
                 source_code.push_back(line);//storing each line into a vector.
@@ -68,12 +73,14 @@ int main()
             }
         }  
     }
-    file.close();
-    flag = false;
-    stack<string> braices;
-    int main_start = 0;
-    int main_end = 0;
-    bool is_found = false;
+    file.close();//Reading file is done and so closing the file.
+    flag = false;//For checking main function source code.
+    bool flg2 = false;
+    stack<string> braices;//main source code grabbing and braices check.
+    int main_start = 0;//from where main functions start.
+    int main_end = 0;//from where main functions end.
+    bool is_found = false;//whether main function is found or not?
+    int last_braices = 0;
     for(int it = 0;it < source_code.size();it++){
         smatch head;
         if(regex_match(source_code[it],head,regex("#\\s*include\\s*<([\\w\\s\\.]*)>"))){
@@ -92,13 +99,34 @@ int main()
                 is_found = true;
             }
             if(regex_match(source_code[it],regex(".*\\}.*"))){
-                braices.pop();
+                if(!braices.empty()){
+                    braices.pop();
+                }else{
+                    cout<<"Imbalance got } at "<<line_number[last_braices]<<endl;
+                }
+                
                 if(braices.empty() && is_found){
                     main_end = it;
                     flag = false;   
                 }
             }
         }
+        else{
+            if(regex_match(source_code[it],regex(".*\\}.*"))){
+                braices.push("{");
+                last_braices = it;
+            }
+            else if(regex_match(source_code[it],regex(".*\\}.*")) && flg2){
+                if(braices.empty()){
+                    cout<<"Imbalance got { at"<<line_number[last_braices];
+                    continue;
+                }
+                braices.pop();
+            }
+        }
+    }
+    if(!braices.empty()){
+        cout<<"Imbalance { at"<<line_number[last_braices]<<endl;
     }
     for(int it = main_start;it <= main_end;it++){
         //cout<<source_code[it]<<endl;
