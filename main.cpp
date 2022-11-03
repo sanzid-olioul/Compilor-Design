@@ -78,7 +78,7 @@ int main()
     bool flg2 = false;
     stack<string> braices;//main source code grabbing and braices check.
     int main_start = 0;//from where main functions start.
-    int main_end = 0;//from where main functions end.
+    int main_end = -1;//from where main functions end.
     bool is_found = false;//whether main function is found or not?
     int last_braices = 0;
     for(int it = 0;it < source_code.size();it++){
@@ -112,13 +112,13 @@ int main()
             }
         }
         else{
-            if(regex_match(source_code[it],regex(".*\\}.*"))){
+            if(regex_match(source_code[it],regex(".*\\{.*"))){
                 braices.push("{");
                 last_braices = it;
             }
-            else if(regex_match(source_code[it],regex(".*\\}.*")) && flg2){
+            else if(regex_match(source_code[it],regex(".*\\}.*"))){
                 if(braices.empty()){
-                    cout<<"Imbalance got { at"<<line_number[last_braices];
+                    cout<<"Imbalance got { at "<<line_number[last_braices]<<endl;
                     continue;
                 }
                 braices.pop();
@@ -147,6 +147,10 @@ int main()
             // cout<<func.str(1)<<endl;
         } 
     }
+    if(!is_found){
+        cout<<"No main function found!"<<endl;
+        return 0;
+    }
     int i=0,j=0,k=0;
     while(i<functions.size()){
         j=0;
@@ -168,7 +172,5 @@ int main()
         }
         i++;
     }
-    
-    
     return 0;
 }

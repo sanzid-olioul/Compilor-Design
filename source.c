@@ -1,7 +1,5 @@
-#include<conio.h>
 #include<stdio.h>
-void main()
-}
+void mai()
 {
     int a = 25;         
     int b= 34;        //comment one
@@ -10,7 +8,7 @@ void main()
         scanf("%d",&a)
     }
     while(some)
-    
+    {
         i am here
     }
     /*
