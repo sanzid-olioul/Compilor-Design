@@ -1,15 +1,16 @@
 #include<stdio.h>
-void mai()
+void main()
 {
     int a = 25;         
     int b= 34;        //comment one
     if(a<b){
         printf("hellow");
-        scanf("%d",&a)
+        scanf("%d",&a);
     }
-    while(some)
+    while(a<b)
     {
-        i am here
+        printf("hellow");
+        scanf("%d",&a);
     }
     /*
     some comments
@@ -18,7 +19,7 @@ void mai()
     */
     //comment 2
     //another comments
-    float x = 34.44
+    float x = 34.44;
     return 0;      
 }
 

@@ -43,6 +43,7 @@ int main()
     string raw_code = "";//raw string of full source code.
     bool flag = true;//taking a flag for skipping multi line comments.
     int line_count = 0;//for keep track of user source code line.
+    bool err = false; //whteher we found any err or not
     add_headers();//for initializing library headers.
     while (getline (file, line)) {
         line_count++;//for every iterate increasing line number
@@ -103,6 +104,7 @@ int main()
                     braices.pop();
                 }else{
                     cout<<"Imbalance got } at "<<line_number[last_braices]<<endl;
+                    err = true;
                 }
                 
                 if(braices.empty() && is_found){
@@ -118,7 +120,8 @@ int main()
             }
             else if(regex_match(source_code[it],regex(".*\\}.*"))){
                 if(braices.empty()){
-                    cout<<"Imbalance got { at "<<line_number[last_braices]<<endl;
+                    cout<<"Imbalance got } at "<<line_number[last_braices]<<endl;
+                    err = true;
                     continue;
                 }
                 braices.pop();
@@ -127,17 +130,19 @@ int main()
     }
     if(!braices.empty()){
         cout<<"Imbalance { at"<<line_number[last_braices]<<endl;
+        err = true;
     }
     for(int it = main_start;it <= main_end;it++){
         //cout<<source_code[it]<<endl;
         if(regex_match(source_code[it],regex(".*;$"))){
             if(regex_match(source_code[it],regex("(?:.*\\{.*)|(?:.*\\}.*)|(?:.*if\\s*\\(.*\\).*)|(?:while\\s*\\(.+\\).*)|(?:int|void|float|double|char)\\s+[A-Za-z_][A-Za-z0-9_]*\\s*\\(\\)\\s*\\{?"))){
                 cout<<"Extra semiclone is given on line: "<<line_number[it]<<" "<<source_code[it]<<endl;
+                err = true;
             }
         }else{
             if(!regex_match(source_code[it],regex("(?:.*\\{.*)|(?:.*\\}.*)|(?:.*if\\s*\\(.*\\).*)|(?:while\\s*\\(.+\\))|(?:int|void|float|double|char)\\s+[A-Za-z_][A-Za-z0-9_]*\\s*\\(\\)\\s*\\{?"))){
                 cout<<"no semiclone at "<<source_code[it]<<" "<<line_number[it]<<endl;
-                
+                err = true;
             }
         }
         smatch func;
@@ -149,6 +154,7 @@ int main()
     }
     if(!is_found){
         cout<<"No main function found!"<<endl;
+        err = true;
         return 0;
     }
     int i=0,j=0,k=0;
@@ -169,8 +175,12 @@ int main()
         }
         if(!found){
             cout<<functions[i]<<" is not defined on line "<<funcl[i]<<endl;
+            err = true;
         }
         i++;
+    }
+    if(!err){
+        cout<<"build Successfully."<<endl;
     }
     return 0;
 }
