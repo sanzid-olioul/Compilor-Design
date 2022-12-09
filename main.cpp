@@ -132,15 +132,16 @@ int main()
         cout<<"Imbalance { at"<<line_number[last_braices]<<endl;
         err = true;
     }
+    map<string,string> variable;
     for(int it = main_start;it <= main_end;it++){
         //cout<<source_code[it]<<endl;
         if(regex_match(source_code[it],regex(".*;$"))){
-            if(regex_match(source_code[it],regex("(?:.*\\{.*)|(?:.*\\}.*)|(?:.*if\\s*\\(.*\\).*)|(?:while\\s*\\(.+\\).*)|(?:int|void|float|double|char)\\s+[A-Za-z_][A-Za-z0-9_]*\\s*\\(\\)\\s*\\{?"))){
+            if(regex_match(source_code[it],regex("(?:.*\\{.*)|(?:.*\\}.*)|(?:.*if\\s*\\(.*\\).*)|(?:while\\s*\\(.+\\).*)|(?:for\\s*\\(.*;.*;.*\\)).*|(?:int|void|float|double|char)\\s+[A-Za-z_][A-Za-z0-9_]*\\s*\\(\\)\\s*\\{?"))){
                 cout<<"Extra semiclone is given on line: "<<line_number[it]<<" "<<source_code[it]<<endl;
                 err = true;
             }
         }else{
-            if(!regex_match(source_code[it],regex("(?:.*\\{.*)|(?:.*\\}.*)|(?:.*if\\s*\\(.*\\).*)|(?:while\\s*\\(.+\\))|(?:int|void|float|double|char)\\s+[A-Za-z_][A-Za-z0-9_]*\\s*\\(\\)\\s*\\{?"))){
+            if(!regex_match(source_code[it],regex("(?:.*\\{.*)|(?:.*\\}.*)|(?:.*if\\s*\\(.*\\).*)|(?:while\\s*\\(.+\\))|(?:for\\s*\\(.*;.*;.*\\))|(?:int|void|float|double|char)\\s+[A-Za-z_][A-Za-z0-9_]*\\s*\\(\\)\\s*\\{?"))){
                 cout<<"no semiclone at "<<source_code[it]<<" "<<line_number[it]<<endl;
                 err = true;
             }
@@ -150,7 +151,19 @@ int main()
             functions.push_back(func.str(1));
             funcl.push_back(line_number[it]);
             // cout<<func.str(1)<<endl;
-        } 
+        }
+        smatch var;
+        if(regex_match(source_code[it],var,regex("(int|float|double|char)\\s+([a-zA-Z_][a-zA-Z0-0_]*)\\s*(?:;|=\\s*.*\\s*;)"))){
+            if(!variable.count(var.str(2))){
+                variable[var.str(2)] = var.str(1);
+                err = true;
+            }
+            else{
+                cout<<"Variable "<<var.str(2)<<" on line "<<line_number[it]<<" has already been decleared!"<<endl;
+            }
+        }
+        
+
     }
     if(!is_found){
         cout<<"No main function found!"<<endl;
