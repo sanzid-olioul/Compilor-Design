@@ -11,9 +11,8 @@ vector<string> source_code;
 vector<int> line_number,funcl;
 vector<string> functions;
 vector<string> headers;
-
-
 map<string,vector<string>> header_functions;
+map<string,pair<string,string>> variable;
 /*
 For adding standard functions of the header files;
 */
@@ -23,7 +22,6 @@ void add_headers(){
     header_functions["stdio.h"].push_back("gets");
     header_functions["stdio.h"].push_back("puts");
     header_functions["stdio.h"].push_back("getline");
-
     header_functions["conio.h"].push_back("clrscr");
     header_functions["conio.h"].push_back("getch");
     header_functions["conio.h"].push_back("getche");
@@ -33,6 +31,35 @@ void add_headers(){
     header_functions["math.h"].push_back("random");
     header_functions["math.h"].push_back("round");
     header_functions["math.h"].push_back("truncat");    
+}
+
+
+void print_variable(){
+    for (auto& x: variable) {  
+        cout << x.first << ": " << x.second.first << ": "<<x.second.second<<'\n';  
+    }  
+}
+
+
+
+bool printf_function(string line){
+    vector<string> v;
+    stringstream ss(line);
+    while (ss.good()) {
+        string substr;
+        getline(ss, substr, ',');
+        v.push_back(substr);
+    }
+    const regex r("(%d|%c|%lf|%f|%s)");
+    const std::string in = v[0];
+    std::string out = in;
+    int i = 1;
+    while (std::regex_search(out, r)) {
+        out = std::regex_replace(out, r, variable[v[i]].second,regex_constants::format_first_only);
+        i++;
+    }
+    cout<<out<<endl;
+    return true;
 }
 
 int main()
@@ -87,13 +114,10 @@ int main()
         if(regex_match(source_code[it],head,regex("#\\s*include\\s*<([\\w\\s\\.]*)>"))){
             headers.push_back(head.str(1));
         }
-
-
         if(regex_match(source_code[it],regex("(?:int|void)\\s+main\\s*\\(\\)\\s*\\{?"))){
             flag = true;
             main_start = it;
         }
-        
         if(flag){
             if(regex_match(source_code[it],regex(".*\\{.*"))){
                 braices.push("{");
@@ -106,7 +130,6 @@ int main()
                     cout<<"Imbalance got } at "<<line_number[last_braices]<<endl;
                     err = true;
                 }
-                
                 if(braices.empty() && is_found){
                     main_end = it;
                     flag = false;   
@@ -132,7 +155,6 @@ int main()
         cout<<"Imbalance { at"<<line_number[last_braices]<<endl;
         err = true;
     }
-    map<string,string> variable;
     for(int it = main_start;it <= main_end;it++){
         //cout<<source_code[it]<<endl;
         if(regex_match(source_code[it],regex(".*;$"))){
@@ -147,22 +169,68 @@ int main()
             }
         }
         smatch func;
-        if(regex_match(source_code[it],func,regex("\\s*([a-zA-Z_][a-zA-Z0-0_]*)\\([\\w,\"%&]*\\)\\s*;"))){
+        //For seeking the printf function
+        if(regex_match(source_code[it],func,regex("printf\\((.*)\\)\\s*;"))){
+            printf_function(func.str(1));
+            cout<<"i am called bro"<<endl;
+        }
+        else if(regex_match(source_code[it],func,regex("\\s*([a-zA-Z_][a-zA-Z0-0_]*)\\([\\w,\"%&]*\\)\\s*;"))){
             functions.push_back(func.str(1));
             funcl.push_back(line_number[it]);
-            // cout<<func.str(1)<<endl;
+            cout<<func.str(1)<<endl;
         }
+
+
+
+
+
+
+
+
         smatch var;
-        if(regex_match(source_code[it],var,regex("(int|float|double|char)\\s+([a-zA-Z_][a-zA-Z0-0_]*)\\s*(?:;|=\\s*.*\\s*;)"))){
+
+        // For declearing a new variable
+        if(regex_match(source_code[it],var,regex("(int|float|double|char)\\s+([a-zA-Z_][a-zA-Z0-0_]*)\\s*;"))){
             if(!variable.count(var.str(2))){
-                variable[var.str(2)] = var.str(1);
-                err = true;
+                variable[var.str(2)].first = var.str(1);
+                variable[var.str(2)].second = "Nan";
+                // cout<<variable[var.str(2)].first<<" " <<variable[var.str(2)].second<<endl; 
             }
             else{
+                err = true;
                 cout<<"Variable "<<var.str(2)<<" on line "<<line_number[it]<<" has already been decleared!"<<endl;
             }
         }
+
+        // For declrae and initialize a variable
+        if(regex_match(source_code[it],var,regex("(int|float|double|char)\\s+([a-zA-Z_][a-zA-Z0-0_]*)\\s*=\\s*(.+)\\s*;"))){
+            if(!variable.count(var.str(2))){
+                variable[var.str(2)].first = var.str(1);
+                variable[var.str(2)].second = var.str(3);
+                // cout<<variable[var.str(2)].first<<" " <<variable[var.str(2)].second<<endl; 
+            }
+            else{
+                err = true;
+                cout<<"Variable "<<var.str(2)<<" on line "<<line_number[it]<<" has already been decleared!"<<endl;
+            }
+        }
+        // For assigning a value to a existing variable
+        if(regex_match(source_code[it],var,regex("([a-zA-Z_][a-zA-Z0-0_]*)\\s*=\\s*(.+)\\s*;"))){
+            if(variable.count(var.str(1))){
+                // variable[var.str(1)].first = var.str(1);
+                variable[var.str(1)].second = var.str(2);
+                // cout<<variable[var.str(2)].first<<" " <<variable[var.str(2)].second<<endl; 
+            }
+            else{
+                err = true;
+                cout<<"Variable "<<var.str(1)<<" on line "<<line_number[it]<<" has never been decleared!"<<endl;
+            }
+        }
+
         
+
+
+
 
     }
     if(!is_found){
@@ -195,5 +263,7 @@ int main()
     if(!err){
         cout<<"build Successfully."<<endl;
     }
+    // print_variable();
+    // printf_function("\"hii there %d is the %d \",a,b");
     return 0;
 }
