@@ -5,6 +5,7 @@
 #include<regex>
 #include<stack>
 #include<map>
+#include "math_expressions.h"
 using namespace std;
 vector<string> main_elements;
 vector<string> source_code;
@@ -51,7 +52,7 @@ bool printf_function(string line){
         v.push_back(substr);
     }
     const regex r("(%d|%c|%lf|%f|%s)");
-    const std::string in = v[0];
+    const std::string in = v[0].substr(1,v[0].length()-2);
     std::string out = in;
     int i = 1;
     while (std::regex_search(out, r)) {
@@ -172,12 +173,11 @@ int main()
         //For seeking the printf function
         if(regex_match(source_code[it],func,regex("printf\\((.*)\\)\\s*;"))){
             printf_function(func.str(1));
-            cout<<"i am called bro"<<endl;
         }
         else if(regex_match(source_code[it],func,regex("\\s*([a-zA-Z_][a-zA-Z0-0_]*)\\([\\w,\"%&]*\\)\\s*;"))){
             functions.push_back(func.str(1));
             funcl.push_back(line_number[it]);
-            cout<<func.str(1)<<endl;
+            // cout<<func.str(1)<<endl;
         }
 
 
@@ -217,15 +217,30 @@ int main()
         // For assigning a value to a existing variable
         if(regex_match(source_code[it],var,regex("([a-zA-Z_][a-zA-Z0-0_]*)\\s*=\\s*(.+)\\s*;"))){
             if(variable.count(var.str(1))){
-                // variable[var.str(1)].first = var.str(1);
-                variable[var.str(1)].second = var.str(2);
-                // cout<<variable[var.str(2)].first<<" " <<variable[var.str(2)].second<<endl; 
+                //Mathematical expressions
+                smatch exp;
+                string str = var.str(2);
+                if(regex_match(str,exp,regex("(.*(?:\\+|-|\\*|/).*)"))){
+                    
+                    
+                    variable[var.str(1)].second = to_string(evaluate(exp.str(1)));
+                }
+                else{
+                    // variable[var.str(1)].first = var.str(1);
+                    variable[var.str(1)].second = var.str(2);
+                    
+                    // cout<<variable[var.str(2)].first<<" " <<variable[var.str(2)].second<<endl;
+                }
             }
             else{
                 err = true;
                 cout<<"Variable "<<var.str(1)<<" on line "<<line_number[it]<<" has never been decleared!"<<endl;
             }
         }
+
+
+        
+
 
         
 
