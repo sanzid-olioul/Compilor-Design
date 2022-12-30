@@ -22,8 +22,10 @@ void main()
         printf("hellow how are you");
         scanf("%d",&a);
     }
-    for(int i=0;i<10;i++){
-        print("i am here");
+    for(int i=0;i<10;i++) 
+    {
+        printf("i am here %d",i);
+        printf("hii there %d",i);
 
     }
     

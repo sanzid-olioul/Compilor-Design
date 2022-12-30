@@ -82,7 +82,7 @@ bool condition_checker(string tokens){
             b = stoi(variable[second].second);
         }
 
-        cout<<condition.str(1)<<" : "<<condition.str(2)<<" : "<<condition.str(3)<<endl;
+        // cout<<condition.str(1)<<" : "<<condition.str(2)<<" : "<<condition.str(3)<<endl;
         // cout<<"Condition is the: "<<<<endl;
         return checkOp(a,b,op);
 
@@ -192,15 +192,15 @@ int main()
     stack<string> condition_braices,loop_braices;
     string loop_variable,loop_inc,loop_condition;
     for(int it = main_start;it <= main_end;it++){
-
+        // cout<<source_code[it]<<endl;
         //Checking for loop
         smatch loop;
-        if(regex_match(source_code[it],loop,regex("for\\s*\\(\\s*(.*)\\s*;\\s*(.*)\\s*;\\s*(.*)\\s*\\)\\{?"))){
+        if(regex_match(source_code[it],loop,regex("for\\s*\\(\\s*(.*)\\s*;\\s*(.*)\\s*;\\s*(.*)\\s*\\)\\s*\\{?\\s*"))){
             loop_variable = loop.str(1);
             loop_condition = loop.str(2);
             loop_inc = loop.str(3);
             smatch var;
-            if(regex_match(source_code[it],var,regex("(int|float|double|char)\\s+([a-zA-Z_][a-zA-Z0-0_]*)\\s*=\\s*(.+)\\s*;"))){
+            if(regex_match(loop_variable,var,regex("(int|float|double|char)\\s+([a-zA-Z_][a-zA-Z0-0_]*)\\s*=\\s*(.+)\\s*"))){
                 if(!variable.count(var.str(2))){
                     variable[var.str(2)].first = var.str(1);
                     variable[var.str(2)].second = var.str(3);
@@ -213,7 +213,7 @@ int main()
             }
 
             // For assigning a value to a existing variable in loop
-            if(regex_match(source_code[it],var,regex("([a-zA-Z_][a-zA-Z0-0_]*)\\s*=\\s*(.+)\\s*;"))){
+            if(regex_match(loop_variable,var,regex("([a-zA-Z_][a-zA-Z0-0_]*)\\s*=\\s*(.+)\\s*"))){
                 if(variable.count(var.str(1))){
                     variable[var.str(1)].second = var.str(2); 
                     loop_variable = var.str(1);
@@ -226,19 +226,23 @@ int main()
 
 
             loop_founded = true;
+            bool b_f = false;
             int temp = it;
             while(temp<=main_end){
                 if(regex_match(source_code[temp],regex(".*\\{.*"))){
                     loop_braices.push("{");
-                    loop_start = temp+1;
+                    loop_start = temp;
+                    b_f = true;
+
                 }
                 if(regex_match(source_code[temp],regex(".*\\}.*"))){
                     if(!loop_braices.empty()){
                         loop_braices.pop();
                     }
                 }
-                if(loop_braices.empty()){
-                    loop_end = temp;
+                if(b_f && loop_braices.empty()){
+                    loop_end = temp-1;
+
                     break;
                 }
                 temp++;
@@ -390,24 +394,26 @@ int main()
 
 
         if(loop_founded){
-            smatch temp_match;
-            if(regex_match(source_code[it],temp_match,regex(".*(\\+\\+|--).*"))){
-                string inc = temp_match.str(1);
-                if(inc=="++"){
-                    variable[loop_variable].second = to_string(stoi(variable[loop_variable].second) +1);
-                }
-                else if(inc=="--"){
-                    variable[loop_variable].second = to_string(stoi(variable[loop_variable].second) -1);
-                }
-            }
             if(it == loop_end){
+                smatch temp_match;
+
+                if(regex_match(loop_inc,temp_match,regex(".*(\\+\\+|--).*"))){
+                    string inc = temp_match.str(1);
+                    if(inc=="++"){
+                        variable[loop_variable].second = to_string(stoi(variable[loop_variable].second) +1);
+                    }
+                    else if(inc=="--"){
+                        variable[loop_variable].second = to_string(stoi(variable[loop_variable].second) -1);
+                    }
+                }
                 if(condition_checker(loop_condition)){
-                    it = loop_start-1;
+                    it = loop_start;
                 }else{
                     loop_founded = false;
                 }
             }
         }
+        
 
     }
     if(!is_found){
