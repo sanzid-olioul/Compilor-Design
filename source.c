@@ -3,16 +3,19 @@ void main()
 {
     int a = 25;         
     int b;       //comment one
-    b = 52+22;
+    b = 5;
     int c = 52;
-    if(a>b){
-        // printf("hellow");
-        scanf("%d",&a);
+    if(a<b){
+        printf("i am also true from if");
+        // scanf("%d",&a);
+    }
+    else{
+        printf("i am also true from else");
     }
 
     if(a>=25){
         // printf("hellow");
-        printf("the value of a is %d",a);
+        printf("i am true %d",a);
     }
     while(a<b)
     {

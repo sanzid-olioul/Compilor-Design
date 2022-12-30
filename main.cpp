@@ -83,9 +83,11 @@ bool condition_checker(string tokens){
         }
 
         cout<<condition.str(1)<<" : "<<condition.str(2)<<" : "<<condition.str(3)<<endl;
-        cout<<"Condition is the: "<<checkOp(a,b,op)<<endl;
+        // cout<<"Condition is the: "<<<<endl;
+        return checkOp(a,b,op);
 
     }
+    return false;
 }
 
 int main()
@@ -181,7 +183,87 @@ int main()
         cout<<"Imbalance { at"<<line_number[last_braices]<<endl;
         err = true;
     }
+    bool if_founded = false;
+    bool if_true = false;
+    stack<string> condition_braices;
     for(int it = main_start;it <= main_end;it++){
+
+        
+        smatch cond;
+        
+        //Checking condition
+        if(regex_match(source_code[it],cond,regex("if\\s*\\(\\s*(.*)\\s*\\)\\{?"))){
+            if_founded = true;
+            bool result = condition_checker(cond.str(1));
+            if(result){
+                if_true = true;
+            }
+            else{
+                while(it<=main_end){
+                    if(regex_match(source_code[it],regex(".*\\{.*"))){
+                        condition_braices.push("{");
+                    }
+                    if(regex_match(source_code[it],regex(".*\\}.*"))){
+                        if(!condition_braices.empty()){
+                            condition_braices.pop();
+                        }
+                    }
+                    if(condition_braices.empty()){
+                        break;
+                    }
+                    it++;
+                }
+            }
+        }
+        if(regex_match(source_code[it],cond,regex(".*else\\s*\\{?"))){
+            if(if_founded){
+                if(if_true){
+                    while(it<=main_end){
+                        if(regex_match(source_code[it],regex(".*\\{.*"))){
+                            condition_braices.push("{");
+                        }
+                        if(regex_match(source_code[it],regex(".*\\}.*"))){
+                            if(!condition_braices.empty()){
+                                condition_braices.pop();
+                            }
+                        }
+                        if(condition_braices.empty()){
+                            break;
+                        }
+                        it++;
+                    }
+                }
+            }else{
+                cout<<"Else statement is not allow without if statement! on line "<<line_number[it]<<endl;
+            }
+
+
+
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         //cout<<source_code[it]<<endl;
         if(regex_match(source_code[it],regex(".*;$"))){
             if(regex_match(source_code[it],regex("(?:.*\\{.*)|(?:.*\\}.*)|(?:.*if\\s*\\(.*\\).*)|(?:while\\s*\\(.+\\).*)|(?:for\\s*\\(.*;.*;.*\\)).*|(?:int|void|float|double|char)\\s+[A-Za-z_][A-Za-z0-9_]*\\s*\\(\\)\\s*\\{?"))){
@@ -204,13 +286,7 @@ int main()
             funcl.push_back(line_number[it]);
             // cout<<func.str(1)<<endl;
         }
-        smatch cond;
-        //Checking condition
-        if(regex_match(source_code[it],cond,regex("if\\((.*)\\)\\{?"))){
-            cout<<cond.str(1)<<endl;
-            cout<<condition_checker(cond.str(1))<<endl;
-
-        }
+        
 
 
 
