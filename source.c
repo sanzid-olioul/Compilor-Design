@@ -3,11 +3,16 @@ void main()
 {
     int a = 25;         
     int b;       //comment one
-    b = 52;
+    b = 52+22;
     int c = 52;
-    if(a<b){
+    if(a>b){
         // printf("hellow");
         scanf("%d",&a);
+    }
+
+    if(a>=25){
+        // printf("hellow");
+        printf("the value of a is %d",a);
     }
     while(a<b)
     {
@@ -17,6 +22,7 @@ void main()
     for(int i=0;i<10;i++){
 
     }
+    
     b =  57 + 4588;
     c = 25 *45;
     printf("this is the value of %d %d",a,b);

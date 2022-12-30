@@ -6,6 +6,7 @@
 #include<stack>
 #include<map>
 #include "math_expressions.h"
+#include "condition_check.h"
 using namespace std;
 vector<string> main_elements;
 vector<string> source_code;
@@ -42,7 +43,6 @@ void print_variable(){
 }
 
 
-
 bool printf_function(string line){
     vector<string> v;
     stringstream ss(line);
@@ -61,6 +61,31 @@ bool printf_function(string line){
     }
     cout<<out<<endl;
     return true;
+}
+
+bool condition_checker(string tokens){
+    smatch condition;
+    if(regex_match(tokens,condition,regex("\\s*(.*)\\s*(==|>=|<=|>|<|&&|\\|\\|)\\s*(.*)\\s*"))){
+        string first,op,second;
+        first = condition.str(1);
+        op = condition.str(2);
+        second = condition.str(3);
+        int a,b;
+        if(isdigit(first[0])){
+            a = stoi(first);
+        }else{
+            a = stoi(variable[first].second);
+        }
+        if(isdigit(second[0])){
+            b = stoi(second);
+        }else{
+            b = stoi(variable[second].second);
+        }
+
+        cout<<condition.str(1)<<" : "<<condition.str(2)<<" : "<<condition.str(3)<<endl;
+        cout<<"Condition is the: "<<checkOp(a,b,op)<<endl;
+
+    }
 }
 
 int main()
@@ -179,7 +204,13 @@ int main()
             funcl.push_back(line_number[it]);
             // cout<<func.str(1)<<endl;
         }
+        smatch cond;
+        //Checking condition
+        if(regex_match(source_code[it],cond,regex("if\\((.*)\\)\\{?"))){
+            cout<<cond.str(1)<<endl;
+            cout<<condition_checker(cond.str(1))<<endl;
 
+        }
 
 
 
@@ -214,6 +245,12 @@ int main()
                 cout<<"Variable "<<var.str(2)<<" on line "<<line_number[it]<<" has already been decleared!"<<endl;
             }
         }
+
+        
+
+
+
+
         // For assigning a value to a existing variable
         if(regex_match(source_code[it],var,regex("([a-zA-Z_][a-zA-Z0-0_]*)\\s*=\\s*(.+)\\s*;"))){
             if(variable.count(var.str(1))){

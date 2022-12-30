@@ -13,6 +13,7 @@ int applyOp(int a, int b, char op){
         case '-': return a - b;
         case '*': return a * b;
         case '/': return a / b;
+        default: return 0;
     }
 }
 int evaluate(string tokens){
