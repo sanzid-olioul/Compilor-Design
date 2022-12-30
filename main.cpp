@@ -185,12 +185,68 @@ int main()
     }
     bool if_founded = false;
     bool if_true = false;
-    stack<string> condition_braices;
+    bool loop_founded = false;
+    // bool loop_condition = false;
+    int loop_start = 0;
+    int loop_end = 0;
+    stack<string> condition_braices,loop_braices;
+    string loop_variable,loop_inc,loop_condition;
     for(int it = main_start;it <= main_end;it++){
 
-        
+        //Checking for loop
+        smatch loop;
+        if(regex_match(source_code[it],loop,regex("for\\s*\\(\\s*(.*)\\s*;\\s*(.*)\\s*;\\s*(.*)\\s*\\)\\{?"))){
+            loop_variable = loop.str(1);
+            loop_condition = loop.str(2);
+            loop_inc = loop.str(3);
+            smatch var;
+            if(regex_match(source_code[it],var,regex("(int|float|double|char)\\s+([a-zA-Z_][a-zA-Z0-0_]*)\\s*=\\s*(.+)\\s*;"))){
+                if(!variable.count(var.str(2))){
+                    variable[var.str(2)].first = var.str(1);
+                    variable[var.str(2)].second = var.str(3);
+                    loop_variable = var.str(2);
+                }
+                else{
+                    err = true;
+                    cout<<"Variable "<<var.str(2)<<" on line "<<line_number[it]<<" has already been decleared!"<<endl;
+                }
+            }
+
+            // For assigning a value to a existing variable in loop
+            if(regex_match(source_code[it],var,regex("([a-zA-Z_][a-zA-Z0-0_]*)\\s*=\\s*(.+)\\s*;"))){
+                if(variable.count(var.str(1))){
+                    variable[var.str(1)].second = var.str(2); 
+                    loop_variable = var.str(1);
+                }
+                else{
+                    err = true;
+                    cout<<"Variable "<<var.str(1)<<" on line "<<line_number[it]<<" has never been decleared!"<<endl;
+                }
+            }
+
+
+            loop_founded = true;
+            int temp = it;
+            while(temp<=main_end){
+                if(regex_match(source_code[temp],regex(".*\\{.*"))){
+                    loop_braices.push("{");
+                    loop_start = temp+1;
+                }
+                if(regex_match(source_code[temp],regex(".*\\}.*"))){
+                    if(!loop_braices.empty()){
+                        loop_braices.pop();
+                    }
+                }
+                if(loop_braices.empty()){
+                    loop_end = temp;
+                    break;
+                }
+                temp++;
+            }
+            it = loop_start;
+        }
+
         smatch cond;
-        
         //Checking condition
         if(regex_match(source_code[it],cond,regex("if\\s*\\(\\s*(.*)\\s*\\)\\{?"))){
             if_founded = true;
@@ -240,28 +296,6 @@ int main()
 
 
         }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
         //cout<<source_code[it]<<endl;
@@ -355,10 +389,25 @@ int main()
         
 
 
-        
-
-
-
+        if(loop_founded){
+            smatch temp_match;
+            if(regex_match(source_code[it],temp_match,regex(".*(\\+\\+|--).*"))){
+                string inc = temp_match.str(1);
+                if(inc=="++"){
+                    variable[loop_variable].second = to_string(stoi(variable[loop_variable].second) +1);
+                }
+                else if(inc=="--"){
+                    variable[loop_variable].second = to_string(stoi(variable[loop_variable].second) -1);
+                }
+            }
+            if(it == loop_end){
+                if(condition_checker(loop_condition)){
+                    it = loop_start-1;
+                }else{
+                    loop_founded = false;
+                }
+            }
+        }
 
     }
     if(!is_found){

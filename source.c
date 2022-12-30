@@ -23,6 +23,7 @@ void main()
         scanf("%d",&a);
     }
     for(int i=0;i<10;i++){
+        print("i am here");
 
     }
     
